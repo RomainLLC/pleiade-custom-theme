@@ -1,0 +1,10 @@
+.role-administrator .page-wrapper > .container-fluid, .role-administrator .page-wrapper > .container-sm, .page-wrapper > .container-md, .role-administrator .page-wrapper > .container-lg, .page-wrapper > .container-xl, .role-administrator .page-wrapper > .container-xxl {
+    padding: 20px 30px;
+    min-height: calc(100vh - 250px);
+    max-width: 1300px;
+  }
+
+  .role-administrator #sidebarnav {
+      padding-top: 3rem;
+  }
+

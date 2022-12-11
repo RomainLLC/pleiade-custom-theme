@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * Pléiade BV theme file.
+ */
+/**
+ * Implements template_preprocess_html().
+ */
+
+// use Drupal\Core\Session\AccountInterface;
+// use Drupal\user\Entity\User;
+
+function pleiadebv_preprocess(&$variables, $hook) {
+    // Récupérer le path du logo
+    // $variables['logo_path'] = '/' . \Drupal::config('b5coll1.settings')->get('logo.path');
+    $variables['logo_path'] = file_url_transform_relative(file_create_url(theme_get_setting('logo.url')));
+
+    // Récupérer le path de base
+    $variables['base_path'] = \Drupal::request()->getHost();
+
+    // Variable is_front pour frontpage
+    try {
+      $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
+    }
+    catch (Exception $e) {
+      $variables['is_front'] = FALSE;
+    }
+    // Ensure the cache varies correctly (new in Drupal 8.3).
+    $variables['#cache']['contexts'][] = 'url.path.is_front';
+
+
+    // User : pic de profil et autres
+
+}
+
+
+function pleiadebv_preprocess_html(&$variables) {
+    $roles = \Drupal::currentUser()->getRoles();
+    foreach ($roles as $role) {
+      $variables['attributes']['class'][] = "role-{$role}";
+    }
+}
+
+function pleiadebv_preprocess_page(&$variables) {
+    $request = \Drupal::request();
+    $route_match = \Drupal::routeMatch();
+    if ($route_match->getParameter('node')) {
+      $page_title = \Drupal::service('title_resolver')->getTitle($request, $route_match->getRouteObject());
+      $variables['pleiade_node_title'] = $page_title;
+    }
+
+    // User info
+    // gets current user name
+  $user_logged_in_name = $variables['user']->getDisplayName();
+
+  // creates value to ouput in the DOM & capitalize first letter
+  $variables['user_logged_in_name'] = ucfirst($user_logged_in_name);
+
+  // gets user email
+  $user_email = $variables['user']->getEmail();
+  $variables['user_email'] = $user_email;
+
+  // get user picture
+  $user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
+  $variables['user_picture'] = $user->get('user_picture')->entity->createFileUrl();
+
+  // default image
+  $field = \Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'user_picture');
+  $default_image = $field->getSetting('default_image');
+  $file = \Drupal::service('entity.repository')->loadEntityByUuid('file', $default_image['uuid']);
+  $picture = file_create_url($file->getFileUri());
+}
+
+// function pleiadebv_preprocess_profile(&$variables) {
+//   $profile = $variables['elements']['#profile'];
+//   $variables['uid'] = $profile->getOwnerId();
+//   $variables['user'] = $profile->getOwner()->getAccountName();
+// }
